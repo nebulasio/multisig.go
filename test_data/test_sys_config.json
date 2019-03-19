@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "proportionOfSigners": {
+    "updateSysConfig": "1",
+    "updateSendNasRule": "1",
+    "addManager": "1",
+    "deleteManager": "1",
+    "replaceManager": "1"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "1",
+  "rule": [
+    {
+      "startValue": "0",
+      "endValue": "0.5",
+      "proportionOfSigners": "0.3"
+    },
+    {
+      "startValue": "0.5",
+      "endValue": "1",
+      "proportionOfSigners": "0.5"
+    },
+    {
+      "startValue": "1",
+      "endValue": "INFINITY",
+      "proportionOfSigners": "1"
+    }
+  ]
+}
