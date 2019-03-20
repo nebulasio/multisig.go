@@ -49,10 +49,15 @@ func CreateSendNasData(txsFilePath string, output string) {
     }
 
     var items []map[string]interface{}
+    ids := make([]interface{}, 10)
     for i := 0; i < len(txs); i++ {
         tx := txs[i]
         data := map[string]interface{}{"action": util.ActionSend, "detail": tx}
-        util.VerifyData(data)
+        _, id := util.VerifyData(data)
+        if util.Contains(ids, id) {
+            util.PrintError("tx.id", id, "has been repeated. ")
+        }
+        ids = append(ids, id)
         item := util.CreateContractData(data)
         if item == nil {
             return

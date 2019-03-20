@@ -32,12 +32,13 @@ func sign(info map[string]interface{}, key string) error {
     }
 
     var sig []byte
-    sig, err = util.Sign([]byte(data.(string)), bytesKey)
+    hash := util.Sha3256([]byte(data.(string)))
+    sig, err = util.Sign(hash[:], bytesKey)
     if err != nil {
         return err
     }
 
-    strSig := string(sig)
+    strSig := hex.EncodeToString(sig)
     _, c := info["sigs"]
     var ss []interface{}
     if !c {
@@ -76,9 +77,21 @@ func Sign(filePath string, keyPath string, outputPath string) {
     if err != nil {
         util.PrintError(err)
     }
-    for _, data := range array {
-        util.VerifyData(data)
-        if err := sign(data, key); err != nil {
+    ids := make([]interface{}, 10)
+    for _, item := range array {
+        d, ok := item["data"]
+        if !ok {
+            util.PrintError("Data error.")
+        }
+        data := util.DeserializeData(d.(string))
+        action, r := util.VerifyData(data)
+        if action == util.ActionSend {
+            if util.Contains(ids, r) {
+                util.PrintError("tx.id", r, "has been repeated. ")
+            }
+            ids = append(ids, r)
+        }
+        if err := sign(item, key); err != nil {
             util.PrintError(err)
         }
     }

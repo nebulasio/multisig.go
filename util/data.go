@@ -67,7 +67,7 @@ func DeserializeData(data string) map[string]interface{} {
     return r
 }
 
-func VerifyData(data map[string]interface{}) {
+func VerifyData(data map[string]interface{}) (string, string) {
     action, ok := data["action"]
     if !ok {
         PrintError("Data error.")
@@ -78,6 +78,7 @@ func VerifyData(data map[string]interface{}) {
         PrintError("Data error.")
     }
 
+    v := ""
     switch action {
     case ActionRemoveSignee:
         VerifyAddress(detail.(string))
@@ -89,7 +90,7 @@ func VerifyData(data map[string]interface{}) {
         verifyReplaceManagerData(detail.(map[string]interface{}))
 
     case ActionSend:
-        verifySendNasData(detail.([]map[string]interface{}))
+        v = verifySendNasData(detail.(map[string]interface{}))
 
     case ActionUpdateRules:
         verifySendNasRule(detail.(map[string]interface{}))
@@ -100,6 +101,7 @@ func VerifyData(data map[string]interface{}) {
     default:
         PrintError("Action", action, "is not supported.")
     }
+    return action.(string), v
 }
 
 func verifyReplaceManagerData(data map[string]interface{}) {
@@ -115,30 +117,27 @@ func verifyReplaceManagerData(data map[string]interface{}) {
 
     VerifyAddress(oldAddress.(string))
     VerifyAddress(newAddress.(string))
+    if oldAddress == newAddress {
+        PrintError("Data error. ")
+    }
 }
 
-func verifySendNasData(data []map[string]interface{}) {
-    ids := make([]interface{}, 10)
-    for _, item := range data {
-        id, ok := item["id"]
-        if !ok || IsEmptyString(id.(string)) {
-            PrintError("tx.id is empty. ")
-        }
-        if Contains(ids, id) {
-            PrintError("tx.id", id, "has been repeated. ")
-        }
-        ids = append(ids, id.(string))
-        to, ok := item["to"]
-        if !ok {
-            PrintError("tx.to is empty. ")
-        }
-        VerifyAddress(to.(string))
-        value, ok := item["value"]
-        if !ok {
-            PrintError("tx.value is empty. ")
-        }
-        VerifyNumber(value.(string))
+func verifySendNasData(item map[string]interface{}) string {
+    id, ok := item["id"]
+    if !ok || IsEmptyString(id.(string)) {
+        PrintError("tx.id is empty. ")
     }
+    to, ok := item["to"]
+    if !ok {
+        PrintError("tx.to is empty. ")
+    }
+    VerifyAddress(to.(string))
+    value, ok := item["value"]
+    if !ok {
+        PrintError("tx.value is empty. ")
+    }
+    VerifyNumber(value.(string))
+    return id.(string)
 }
 
 func verifySysConfig(data map[string]interface{}) {
@@ -153,14 +152,14 @@ func verifySysConfig(data map[string]interface{}) {
         PrintError("proportionOfSigners is empty. ")
     }
 
-    p := t.(map[string]string)
+    p := t.(map[string]interface{})
     ks := []interface{}{"updateSysConfig", "updateSendNasRule", "addManager", "deleteManager", "replaceManager"}
     n := 0
     for k, v := range p {
         if Contains(ks, k) {
             n++
         }
-        VerifyProportions(v)
+        VerifyProportions(v.(string))
     }
     if n != len(ks) {
         PrintError("sys config data error. ")
@@ -179,13 +178,14 @@ func verifySendNasRule(data map[string]interface{}) {
         PrintError("rules is empty. ")
     }
 
-    rules := t.([]map[string]interface{})
+    rules := t.([]interface{})
     if len(rules) <= 0 {
         PrintError("rules is empty. ")
     }
 
     v := 0.0
-    for _, r := range rules {
+    for _, i := range rules {
+        r := i.(map[string]interface{})
         p, ok := r["proportionOfSigners"]
         if !ok {
             PrintError("proportionOfSigners is empty. ")
@@ -198,23 +198,21 @@ func verifySendNasRule(data map[string]interface{}) {
         }
         startValue := ParseFloat(t.(string))
         if v == -1 || startValue != v {
-            PrintError("Rules error. ")
+            PrintError("Rules error. ", startValue, v)
         }
 
         e, ok := r["endValue"]
         if !ok {
             PrintError("endValue is empty. ")
         }
-        var endValue float64
         if e != Infinity {
-            endValue := ParseFloat(e.(string))
-            if startValue >= endValue {
+            v = ParseFloat(e.(string))
+            if startValue >= v {
                 PrintError("Rules error. ")
             }
         } else {
-            endValue = -1
+            v = -1
         }
-        v = endValue
     }
     if v != -1 {
         PrintError("Rules error. ")
