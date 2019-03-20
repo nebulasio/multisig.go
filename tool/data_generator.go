@@ -10,7 +10,7 @@ func CreateDeleteManagerData(address string, output string) {
     data := map[string]interface{}{"action": util.ActionRemoveSignee, "detail": address}
     util.VerifyData(data)
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "delete_manager.json")
+        output = filepath.Join("output", "remove-signee.json")
     }
     util.SerializeDataToFile(data, output)
 }
@@ -19,7 +19,7 @@ func CreateAddManagerData(address string, output string) {
     data := map[string]interface{}{"action": util.ActionAddSignee, "detail": address}
     util.VerifyData(data)
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "add_manager.json")
+        output = filepath.Join("output", "add-signee.json")
     }
     util.SerializeDataToFile(data, output)
 }
@@ -29,7 +29,7 @@ func CreateReplaceManagerData(oldAddress string, newAddress string, output strin
     data := map[string]interface{}{"action": util.ActionReplaceSignee, "detail": m}
     util.VerifyData(data)
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "replace_manager.json")
+        output = filepath.Join("output", "replace-signee.json")
     }
     util.SerializeDataToFile(data, output)
 }
@@ -61,7 +61,7 @@ func CreateSendNasData(txsFilePath string, output string) {
     }
 
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "send_nas.json")
+        output = filepath.Join("output", "send.json")
     }
     util.SerializeDataListToFile(items, output)
 }
@@ -81,7 +81,7 @@ func CreateUpdateSendNasRuleData(ruleFilePath string, output string) {
     data := map[string]interface{}{"action": util.ActionUpdateRules, "detail": rules}
     util.VerifyData(data)
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "update_send_nas_rule.json")
+        output = filepath.Join("output", "update-rules.json")
     }
     util.SerializeDataToFile(data, output)
 }
@@ -101,7 +101,7 @@ func CreateUpdateSysConfigData(filePath string, output string) {
     data := map[string]interface{}{"action": util.ActionUpdateConstitution, "detail": config}
     util.VerifyData(data)
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "update_sys_config.json")
+        output = filepath.Join("output", "update-constitution.json")
     }
     util.SerializeDataToFile(data, output)
 }
@@ -119,7 +119,7 @@ func MergeData(files []string, output string) {
         r = append(r, array...)
     }
     if util.IsEmptyString(output) {
-        output = filepath.Join("output", "merge_data.json")
+        output = filepath.Join("output", "merge-file.json")
     }
     util.SerializeDataListToFile(r, output)
 }
