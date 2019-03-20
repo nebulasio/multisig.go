@@ -50,9 +50,11 @@ neb-cli data-gen replace-signee <address_origin> <address_new> -o <file_content>
 ```
 neb-cli data-gen update-rules <rule_file> -o <file_content>
 ```
+
 - Update the base configration for the smart contract
 ```
 neb-cli data-gen update-constitution <config_file> -o <file_content>
+```
 - Merge multiple data need to be signed
 ```
 neb-cli data-gen merge-file <directory>  -o <file_content>
