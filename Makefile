@@ -26,9 +26,6 @@ endif
 # Setup the -ldflags option for go build here, interpolate the variable values
 LDFLAGS = -ldflags "-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.branch=${BRANCH} -X main.compileAt=`date +%s`"
 
-# Build the project
-.PHONY: build build-linux clean dep lint run test vet link-libs
-
 all: dep clean build
 
 dep:
