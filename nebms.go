@@ -1,11 +1,11 @@
 package main
 
 import (
-    "govote/signer"
-    "govote/tool"
-    "govote/util"
     "os"
     "strings"
+    "vote/signer"
+    "vote/tool"
+    "vote/util"
 )
 
 const helpString = `Command list.
