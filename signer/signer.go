@@ -2,7 +2,6 @@ package signer
 
 import (
     "encoding/hex"
-    "encoding/json"
     "errors"
     "path/filepath"
     "strings"
@@ -55,10 +54,9 @@ func sign(info map[string]interface{}, key string) error {
     return nil
 }
 
-func Sign(filePath string, keyPath string, outputPath string) bool {
+func Sign(filePath string, keyPath string, outputPath string) {
     if util.IsEmptyString(filePath) {
         util.PrintError("data file path is empty. ")
-        return false
     }
 
     if util.IsEmptyString(keyPath) {
@@ -72,41 +70,17 @@ func Sign(filePath string, keyPath string, outputPath string) bool {
     key, err := readKey(keyPath)
     if err != nil {
         util.PrintError(err)
-        return false
     }
 
-    var text string
-    text, err = util.ReadFile(filePath)
+    array, err := util.DeserializeDataFile(filePath)
     if err != nil {
         util.PrintError(err)
-        return false
     }
-
-    var info map[string]interface{}
-    err = json.Unmarshal([]byte(text), &info)
-    if err != nil {
-        util.PrintError(err)
-        return false
+    for _, data := range array {
+        util.VerifyData(data)
+        if err := sign(data, key); err != nil {
+            util.PrintError(err)
+        }
     }
-
-    err = sign(info, key)
-    if err != nil {
-        util.PrintError(err)
-        return false
-    }
-
-    var data []byte
-    if data, err = json.Marshal(info); err != nil {
-        util.PrintError(err)
-        return false
-    }
-
-    if err = util.WriteFile(outputPath, string(data)); err != nil {
-        util.PrintError(err)
-        return false
-    }
-
-    util.Print("success. ->", outputPath)
-    return true
-
+    util.SerializeDataListToFile(array, outputPath)
 }

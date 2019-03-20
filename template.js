@@ -307,7 +307,8 @@ MultiSign.prototype = {
             throw ('Rules cannot be empty.');
         }
         let v = new BigNumber("0");
-        for (let r in rule) {
+        for (let i = 0; i < rule.length; ++i) {
+            let r = rule[i];
             this._checkNumbers(r.startValue);
             if (r.endValue !== this.infinity) {
                 this._checkNumbers(r.endValue);
