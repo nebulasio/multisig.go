@@ -37,4 +37,4 @@ build:
 
 clean:
 	-rm -f $(BINARY)
-	-rm -f $(BINARY)-$(COMMIT)
+	-rm -f $(BINARY)-*
