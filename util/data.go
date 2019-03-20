@@ -70,22 +70,22 @@ func VerifyData(data map[string]interface{}) {
     }
 
     switch action {
-    case ActionDeleteManager:
+    case ActionRemoveSignee:
         VerifyAddress(detail.(string))
 
-    case ActionAddManager:
+    case ActionAddSignee:
         VerifyAddress(detail.(string))
 
-    case ActionReplaceManager:
+    case ActionReplaceSignee:
         verifyReplaceManagerData(detail.(map[string]interface{}))
 
-    case ActionSendNas:
+    case ActionSend:
         verifySendNasData(detail.([]map[string]interface{}))
 
-    case ActionUpdateSendNasRule:
+    case ActionUpdateRules:
         verifySendNasRule(detail.(map[string]interface{}))
 
-    case ActionUpdateSysConfig:
+    case ActionUpdateConstitution:
         verifySysConfig(detail.(map[string]interface{}))
 
     default:
@@ -165,18 +165,18 @@ func verifySendNasRule(data map[string]interface{}) {
     }
     VerifyNumber(ver.(string))
 
-    t, ok := data["rule"]
+    t, ok := data["rules"]
     if !ok {
-        PrintError("rule is empty. ")
+        PrintError("rules is empty. ")
     }
 
-    rule := t.([]map[string]interface{})
-    if len(rule) <= 0 {
-        PrintError("rule is empty. ")
+    rules := t.([]map[string]interface{})
+    if len(rules) <= 0 {
+        PrintError("rules is empty. ")
     }
 
     v := 0.0
-    for _, r := range rule {
+    for _, r := range rules {
         p, ok := r["proportionOfSigners"]
         if !ok {
             PrintError("proportionOfSigners is empty. ")

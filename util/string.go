@@ -7,12 +7,12 @@ import (
 )
 
 const (
-    ActionDeleteManager     = "delete_manager"
-    ActionAddManager        = "add_manager"
-    ActionReplaceManager    = "replace_manager"
-    ActionSendNas           = "send_nas"
-    ActionUpdateSendNasRule = "update_send_nas_rule"
-    ActionUpdateSysConfig   = "update_sys_config"
+    ActionRemoveSignee       = "remove-signee"
+    ActionAddSignee          = "add-signee"
+    ActionReplaceSignee      = "replace-signee"
+    ActionSend               = "send"
+    ActionUpdateRules        = "update-rules"
+    ActionUpdateConstitution = "update-constitution"
 
     Infinity = "INFINITY"
 )

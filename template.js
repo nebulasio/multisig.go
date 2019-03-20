@@ -4,28 +4,28 @@ let crypto = require('crypto.js');
 
 function MultiSign() {
     this.decimal = new BigNumber('1000000000000000000');
-    this.managers = MANAGERS;
-    this._managers = null;
-    this._deletedManagers = null;
-    this._addedManagers = null;
-    this._sysConfig = null;
-    this._sendNasRule = null;
+    this.signees = SIGNEES;
+    this._signees = null;
+    this._removedSignees = null;
+    this._addedSignees = null;
+    this._constitution = null;
+    this._sendRules = null;
 
     this.dataKeyPrefix = "data_";
-    this.deletedManagersKey = "deleted_managers";
-    this.addedManagersKey = "added_managers";
-    this.managerUpdateLogKey = "manager_update_log";
-    this.sendNasRuleKey = "send_nas_rule";
-    this.sendNasRuleUpdateLogKey = "send_nas_rule_update_log";
-    this.sysConfigKey = "sys_config";
-    this.sysConfigUpdateLogKey = "sys_config_update_log";
+    this.removedSigneesKey = "removed_signees";
+    this.addedSigneesKey = "added_signees";
+    this.signeeUpdateLogKey = "signee_update_log";
+    this.sendRulesKey = "send_rules";
+    this.sendRulesUpdateLogKey = "send_rules_update_log";
+    this.constitutionKey = "constitution";
+    this.constitutionUpdateLogKey = "sys_config_update_log";
 
-    this.actionDeleteManager = "delete_manager";
-    this.actionAddManager = "add_manager";
-    this.actionReplaceManager = "replace_manager";
-    this.actionSendNas = "send_nas";
-    this.actionUpdateSysConfig = "update_sys_config";
-    this.actionUpdateSendNasRule = "update_send_nas_rule";
+    this.actionDeleteSignee = "delete-signee";
+    this.actionAddSignee = "add-signee";
+    this.actionReplaceSignee = "replace-signee";
+    this.actionSend = "send";
+    this.actionUpdateConstitution = "update-constitution";
+    this.actionUpdateSendRules = "update-rules";
 
     this.infinity = "INFINITY";
 
@@ -52,12 +52,12 @@ MultiSign.prototype = {
         return this.data.get(this.dataKeyPrefix + key);
     },
 
-    _getSysConfig: function () {
-        if (!this._sysConfig) {
-            this._sysConfig = this.data.get(this.sysConfigKey);
+    _getConstitution: function () {
+        if (!this._constitution) {
+            this._constitution = this.data.get(this.constitutionKey);
         }
-        if (!this._sysConfig) {
-            this._sysConfig = {
+        if (!this._constitution) {
+            this._constitution = {
                 "version": "0",
                 "proportionOfSigners": {
                     "updateSysConfig": "1",
@@ -68,18 +68,18 @@ MultiSign.prototype = {
                 }
             }
         }
-        return this._sysConfig;
+        return this._constitution;
     },
 
-    _getSendNasRule: function () {
-        if (!this._sendNasRule) {
-            this._sendNasRule = this.data.get(this.sendNasRuleKey);
+    _getSendRules: function () {
+        if (!this._sendRules) {
+            this._sendRules = this.data.get(this.sendRulesKey);
         }
-        if (!this._sendNasRule) {
-            // TODO: Confirm the default rule when going online
-            this._sendNasRule = {
+        if (!this._sendRules) {
+            // TODO: Confirm the default rules when going online
+            this._sendRules = {
                 "version": "0",
-                "rule": [
+                "rules": [
                     {
                         "startValue": "0",
                         "endValue": "0.5",
@@ -98,7 +98,7 @@ MultiSign.prototype = {
                 ]
             };
         }
-        return this._sendNasRule;
+        return this._sendRules;
     },
 
     _getLogs(logKey) {
@@ -115,49 +115,48 @@ MultiSign.prototype = {
         this.data.put(logKey, logs);
     },
 
-    _getDeletedManagers: function () {
-        if (!this._deletedManagers) {
-            this._deletedManagers = this.data.get(this.deletedManagersKey);
+    _getRemovedSignees: function () {
+        if (!this._removedSignees) {
+            this._removedSignees = this.data.get(this.removedSigneesKey);
         }
-        if (!this._deletedManagers) {
-            this._deletedManagers = [];
+        if (!this._removedSignees) {
+            this._removedSignees = [];
         }
-        return this._deletedManagers;
+        return this._removedSignees;
     },
 
-    _getAddedManagers: function () {
-        if (!this._addedManagers) {
-            this._addedManagers = this.data.get(this.addedManagersKey);
+    _getAddedSignees: function () {
+        if (!this._addedSignees) {
+            this._addedSignees = this.data.get(this.addedSigneesKey);
         }
-        if (!this._addedManagers) {
-            this._addedManagers = [];
+        if (!this._addedSignees) {
+            this._addedSignees = [];
         }
-        return this._addedManagers;
+        return this._addedSignees;
     },
 
-    _getManagers: function () {
-        if (this._managers == null) {
-            let deletedManagers = this._getDeletedManagers();
-            let addedManagers = this._getAddedManagers();
+    _getSignees: function () {
+        if (this._signees == null) {
+            let removedManagers = this._getRemovedSignees();
+            let addedManagers = this._getAddedSignees();
 
-            this._managers = [];
-            for (let i = 0; i < this.managers.length; ++i) {
-                this._managers.push(this.managers[i]);
+            this._signees = [];
+            for (let i = 0; i < this.signees.length; ++i) {
+                this._signees.push(this.signees[i]);
             }
             for (let i = 0; i < addedManagers.length; ++i) {
-                this._managers.push(addedManagers[i]);
+                this._signees.push(addedManagers[i]);
             }
-            for (let i = 0; i < deletedManagers.length; ++i) {
-                let index = this._managers.indexOf(deletedManagers[i]);
-                this._managers.splice(index, 1);
+            for (let i = 0; i < removedManagers.length; ++i) {
+                let index = this._signees.indexOf(removedManagers[i]);
+                this._signees.splice(index, 1);
             }
         }
-        return this._managers;
+        return this._signees;
     },
 
-    _isDeleted: function (address) {
-        let ms = this._getDeletedManagers();
-        return ms.indexOf(address) >= 0;
+    _isRemoved: function (address) {
+        return this._getRemovedSignees().indexOf(address) >= 0;
     },
 
     _verifyAddresses: function (address) {
@@ -169,19 +168,19 @@ MultiSign.prototype = {
     },
 
     _verifyDeleteAddress: function (address) {
-        let managers = this._getManagers();
+        let managers = this._getSignees();
         if (managers.indexOf(address) < 0) {
             throw (address + ' could not be found.');
         }
     },
 
     _verifyAddAddress: function (address) {
-        let managers = this._getManagers();
+        let managers = this._getSignees();
         if (managers.indexOf(address) >= 0) {
             throw (address + ' is already a manager.');
         }
-        if (this._isDeleted(address)) {
-            throw (address + ' has been deleted.');
+        if (this._isRemoved(address)) {
+            throw (address + ' has been removed.');
         }
     },
 
@@ -205,46 +204,46 @@ MultiSign.prototype = {
         }
     },
 
-    _deleteManagerAddress(address) {
-        let deletedManagers = this._getDeletedManagers();
-        deletedManagers.push(address);
-        this.data.put(this.deletedManagersKey, deletedManagers);
+    _deleteSigneeAddress(address) {
+        let removedManagers = this._getRemovedSignees();
+        removedManagers.push(address);
+        this.data.put(this.removedSigneesKey, removedManagers);
     },
 
-    _addManagerAddress(address) {
-        let addedManagers = this._getAddedManagers();
+    _addSigneeAddress(address) {
+        let addedManagers = this._getAddedSignees();
         addedManagers.push(address);
-        this.data.put(this.addedManagersKey, addedManagers);
+        this.data.put(this.addedSigneesKey, addedManagers);
     },
 
     /**
      * { "action": "delete_manager", "detail": "n1xxxxx" }
      */
-    _deleteManager: function (data, signers) {
+    _deleteSignee: function (data, signers) {
         let address = data.detail;
         this._verifyAddresses(address);
         this._verifyDeleteAddress(address);
-        this._deleteManagerAddress(address);
+        this._deleteSigneeAddress(address);
         data.signers = signers;
-        this._addLog(data, this.managerUpdateLogKey);
+        this._addLog(data, this.signeeUpdateLogKey);
     },
 
     /**
      * { "action": "add_manager", "detail": "n1xxxxx" }
      */
-    _addManager: function (data, signers) {
+    _addSignee: function (data, signers) {
         let address = data.detail;
         this._verifyAddresses(address);
         this._verifyAddAddress(address);
-        this._addManagerAddress(address);
+        this._addSigneeAddress(address);
         data.signers = signers;
-        this._addLog(data, this.managerUpdateLogKey);
+        this._addLog(data, this.signeeUpdateLogKey);
     },
 
     /**
      * { "action": "replace_manager", "detail": { "oldAddress": "n1xxxxx", "newAddress": "n1yyyy" } }
      */
-    _replaceManager: function (data, signers) {
+    _replaceSignee: function (data, signers) {
         let oldAddress = data.detail.oldAddress;
         let newAddress = data.detail.newAddress;
         this._verifyAddresses(oldAddress, newAddress);
@@ -253,17 +252,17 @@ MultiSign.prototype = {
         }
         this._verifyDeleteAddress(oldAddress);
         this._verifyAddAddress(newAddress);
-        this._deleteManagerAddress(oldAddress);
-        this._addManagerAddress(newAddress);
+        this._deleteSigneeAddress(oldAddress);
+        this._addSigneeAddress(newAddress);
 
         data.signers = signers;
-        this._addLog(data, this.managerUpdateLogKey);
+        this._addLog(data, this.signeeUpdateLogKey);
     },
 
     /**
      * { "action": "send_nas", "detail": { "id": "xxx", "to": "n1xxxxx", "value": "0.001" } }
      */
-    _sendNas: function (data, signers) {
+    _send: function (data, signers) {
         let tx = data.detail;
         this._verifyAddAddress(tx.to);
         this._checkNumbers(tx.value);
@@ -287,7 +286,7 @@ MultiSign.prototype = {
      *     "action": "update_send_nas_rule",
      *     "detail": {
      *          "version": "0",
-     *          "rule": [
+     *          "rules": [
      *              { "startValue": "0", "endValue": "0.5", "proportionOfSigners": "0.3" },
      *              { "startValue": "0.5", "endValue": "1", "proportionOfSigners": "0.5" },
      *              { "startValue": "1", "endValue": this.infinity, "proportionOfSigners": "1" }
@@ -295,20 +294,20 @@ MultiSign.prototype = {
      *     ]
      * }
      */
-    _updateSendNasRule: function (data, signers) {
+    _updateSendRules: function (data, signers) {
         this._checkNumbers(data.detail.version);
 
         let ver = parseFloat(data.detail.version);
-        if (ver <= parseFloat(this._getSendNasRule().version)) {
+        if (ver <= parseFloat(this._getSendRules().version)) {
             throw ('Version error.');
         }
-        let rule = data.detail.rule;
-        if (rule.length <= 0) {
+        let rules = data.detail.rules;
+        if (rules.length <= 0) {
             throw ('Rules cannot be empty.');
         }
         let v = new BigNumber("0");
-        for (let i = 0; i < rule.length; ++i) {
-            let r = rule[i];
+        for (let i = 0; i < rules.length; ++i) {
+            let r = rules[i];
             this._checkNumbers(r.startValue);
             if (r.endValue !== this.infinity) {
                 this._checkNumbers(r.endValue);
@@ -324,10 +323,10 @@ MultiSign.prototype = {
         if (v != null) {
             throw ('Rules error.');
         }
-        this._sendNasRule = rule;
-        this.data.put(this.sendNasRuleKey, rule);
+        this._sendRules = rules;
+        this.data.put(this.sendRulesKey, rules);
         data.signers = signers;
-        this._addLog(data, this.sendNasRuleUpdateLogKey);
+        this._addLog(data, this.sendRulesUpdateLogKey);
     },
 
     /**
@@ -345,10 +344,10 @@ MultiSign.prototype = {
      *     }
      * }
      */
-    _updateSysConfig: function (data, signers) {
+    _updateConstitution: function (data, signers) {
         this._checkNumbers(data.detail.version);
         let ver = parseFloat(data.detail.version);
-        if (ver <= parseFloat(this._getSysConfig().version)) {
+        if (ver <= parseFloat(this._getConstitution().version)) {
             throw ('Version error.');
         }
         let ps = data.detail.proportionOfSigners;
@@ -357,18 +356,18 @@ MultiSign.prototype = {
             ps.addManager, ps.deleteManager, ps.replaceManager
         );
         let config = data.detail;
-        this._sysConfig = config;
-        this.data.put(this.sysConfigKey, config);
+        this._constitution = config;
+        this.data.put(this.constitutionKey, config);
         data.signers = signers;
-        this._addLog(data, this.sysConfigUpdateLogKey);
+        this._addLog(data, this.constitutionUpdateLogKey);
     },
 
     _getNumOfNeedsSignersWithSendNasConfig: function (data) {
         let v = new BigNumber(data.detail.value);
-        let rule = this._getSendNasRule().rule;
+        let rules = this._getSendRules().rules;
         let n = 1;
-        for (let i = 0; i < rule.length; ++i) {
-            let r = rule[i];
+        for (let i = 0; i < rules.length; ++i) {
+            let r = rules[i];
             let start = new BigNumber(r.startValue);
             let end = r.endValue === this.infinity ? null : new BigNumber(r.endValue);
             if (v.compareTo(start) >= 0 && (end == null || end.compareTo(v) > 0)) {
@@ -376,28 +375,28 @@ MultiSign.prototype = {
                 break;
             }
         }
-        return n * this._getManagers();
+        return n * this._getSignees();
     },
 
     _getNumOfNeedsSigners: function (data) {
-        let p = this._getSysConfig().proportionOfSigners;
+        let p = this._getConstitution().proportionOfSigners;
         switch (data.action) {
-            case this.actionAddManager:
-                return this._getManagers().length * parseFloat(p.addManager);
+            case this.actionAddSignee:
+                return this._getSignees().length * parseFloat(p.addManager);
 
-            case this.actionDeleteManager:
-                return (this._getManagers().length - 1) * parseFloat(p.deleteManager);
+            case this.actionDeleteSignee:
+                return (this._getSignees().length - 1) * parseFloat(p.deleteManager);
 
-            case this.actionReplaceManager:
-                return (this._getManagers().length - 1) * parseFloat(p.replaceManager);
+            case this.actionReplaceSignee:
+                return (this._getSignees().length - 1) * parseFloat(p.replaceManager);
 
-            case this.actionUpdateSysConfig:
-                return this._getManagers().length * parseFloat(p.updateSysConfig);
+            case this.actionUpdateConstitution:
+                return this._getSignees().length * parseFloat(p.updateSysConfig);
 
-            case this.actionUpdateSendNasRule:
-                return this._getManagers().length * parseFloat(p.updateSendNasRule);
+            case this.actionUpdateSendRules:
+                return this._getSignees().length * parseFloat(p.updateSendNasRule);
 
-            case this.actionSendNas:
+            case this.actionSend:
                 return this._getNumOfNeedsSignersWithSendNasConfig(data);
 
             default:
@@ -406,7 +405,7 @@ MultiSign.prototype = {
     },
 
     _verifySign: function (item) {
-        let managers = this._getManagers();
+        let managers = this._getSignees();
         let signers = [];
 
         let hash = crypto.sha3256(item.data);
@@ -435,51 +434,51 @@ MultiSign.prototype = {
 
     _execute: function (data, signers) {
         switch (data.action) {
-            case this.actionAddManager:
-                this._addManager(data, signers);
+            case this.actionAddSignee:
+                this._addSignee(data, signers);
                 break;
-            case this.actionDeleteManager:
-                this._deleteManager(data, signers);
+            case this.actionDeleteSignee:
+                this._deleteSignee(data, signers);
                 break;
-            case this.actionReplaceManager:
-                this._replaceManager(data, signers);
+            case this.actionReplaceSignee:
+                this._replaceSignee(data, signers);
                 break;
-            case this.actionSendNas:
-                this._sendNas(data, signers);
+            case this.actionSend:
+                this._send(data, signers);
                 break;
-            case this.actionUpdateSendNasRule:
-                this._updateSendNasRule(data, signers);
+            case this.actionUpdateSendRules:
+                this._updateSendRules(data, signers);
                 break;
-            case this.actionUpdateSysConfig:
-                this._updateSysConfig(data, signers);
+            case this.actionUpdateConstitution:
+                this._updateConstitution(data, signers);
                 break;
             default:
                 throw ('Action ' + data.action + ' is not supported.');
         }
     },
 
-    getManagers: function () {
-        return this._getManagers();
+    getSignees: function () {
+        return this._getSignees();
     },
 
-    getSysConfig: function () {
-        return this._getSysConfig()
+    getConstitution: function () {
+        return this._getConstitution()
     },
 
-    getSendNasRule: function () {
-        return this._getSendNasRule();
+    getSendRules: function () {
+        return this._getSendRules();
     },
 
-    getManagerUpdateLogs: function () {
-        return this._getLogs(this.managerUpdateLogKey);
+    getSigneeUpdateLogs: function () {
+        return this._getLogs(this.signeeUpdateLogKey);
     },
 
-    getSendNasRuleUpdateLogs: function () {
-        return this._getLogs(this.sendNasRuleUpdateLogKey);
+    getSendRulesUpdateLogs: function () {
+        return this._getLogs(this.sendRulesUpdateLogKey);
     },
 
-    getSysConfigUpdateLogs: function () {
-        return this._getLogs(this.sysConfigUpdateLogKey);
+    getConstitutionUpdateLogs: function () {
+        return this._getLogs(this.constitutionUpdateLogKey);
     },
 
     execute: function (array) {

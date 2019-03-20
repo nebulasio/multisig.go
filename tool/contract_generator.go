@@ -21,12 +21,12 @@ func CreateContract(filePath string) {
         return
     }
 
-    managerCount, contains := info["manager_count"]
+    signeesCount, contains := info["signees_count"]
     if !contains {
-        util.PrintError("No fields found for 'manager_count'. ")
+        util.PrintError("No fields found for 'signees_count'. ")
         return
     }
-    count := int(managerCount.(float64))
+    count := int(signeesCount.(float64))
 
     addresses, containsAddress := info["addresses"]
     if !containsAddress {
@@ -48,7 +48,7 @@ func CreateContract(filePath string) {
 
     outputPath := filepath.Join("output", "contract.js")
     if data, err := json.Marshal(addrs); err == nil {
-        text = strings.Replace(text, "MANAGERS", string(data), -1)
+        text = strings.Replace(text, "SIGNEES", string(data), -1)
         if err := util.WriteFile(outputPath, text); err != nil {
             util.PrintError(err)
             return

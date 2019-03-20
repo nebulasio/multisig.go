@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "rule": [
+  "rules": [
     {
       "startValue": "0",
       "endValue": "0.5",
