@@ -2,9 +2,9 @@ package tool
 
 import (
     "encoding/json"
-    "govote/util"
     "path/filepath"
     "strings"
+    "vote/util"
 )
 
 func CreateContract(filePath string) {

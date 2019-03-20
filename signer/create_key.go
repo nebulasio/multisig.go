@@ -3,8 +3,8 @@ package signer
 import (
     "encoding/hex"
     "github.com/nebulasio/go-nebulas/crypto/keystore/secp256k1"
-    "govote/util"
     "math/rand"
+    "vote/util"
 )
 
 const (

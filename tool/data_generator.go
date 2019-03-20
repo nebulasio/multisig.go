@@ -2,8 +2,8 @@ package tool
 
 import (
     "encoding/json"
-    "govote/util"
     "path/filepath"
+    "vote/util"
 )
 
 func writeFile(r string, outputPath string) {

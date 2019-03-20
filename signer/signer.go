@@ -4,9 +4,9 @@ import (
     "encoding/hex"
     "encoding/json"
     "errors"
-    "govote/util"
     "path/filepath"
     "strings"
+    "vote/util"
 )
 
 func readKey(keyPath string) (string, error) {
