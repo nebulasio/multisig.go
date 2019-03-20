@@ -58,6 +58,15 @@ func DeserializeDataFile(file string) ([]map[string]interface{}, error) {
     return r, nil
 }
 
+func DeserializeData(data string) map[string]interface{} {
+    var r map[string]interface{}
+    err := json.Unmarshal([]byte(data), &r)
+    if err != nil {
+        PrintError("Data error. ")
+    }
+    return r
+}
+
 func VerifyData(data map[string]interface{}) {
     action, ok := data["action"]
     if !ok {
