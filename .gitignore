@@ -1,5 +1,4 @@
 .output
 output/
-nebms
+neb-cli
 key.txt
-nebms-*
