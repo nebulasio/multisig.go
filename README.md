@@ -3,10 +3,8 @@
 ## Build
 ```
 make build
+./nebms
 ```
-
-
-## ./nebms
 
 **Command list.**
 
