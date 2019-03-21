@@ -148,9 +148,9 @@ func verifyVoteData(item map[string]interface{}) string {
         verifyVoteApprovedAction(action.(map[string]interface{}))
     }
 
-    p, ok := item["proportionOfApproval"]
+    p, ok := item["proportionOfAgree"]
     if !ok {
-        PrintError("vote.proportionOfApproval is empty. ")
+        PrintError("vote.proportionOfAgree is empty. ")
     }
     VerifyProportions(p.(string))
 

@@ -2,13 +2,13 @@
   {
     "id": "xxxxx",
     "content": "test content",
-    "proportionOfApproval": "0.8",
+    "proportionOfAgree": "0.8",
     "approvedAction": {}
   },
   {
     "id": "yyyy",
     "content": "test content1",
-    "proportionOfApproval": "1",
+    "proportionOfAgree": "1",
     "approvedAction": {}
   }
 ]

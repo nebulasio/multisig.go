@@ -202,7 +202,7 @@ MultiSign.prototype = {
     _checkNumbers: function () {
         for (let i = 0; i < arguments.length; ++i) {
             let n = arguments[i];
-            if (n === null || n === undefined || !/^\d+(\.\d+)?$/.test(n)) {
+            if (n === undefined || n == null || !/^\d+(\.\d+)?$/.test(n)) {
                 throw ('Data error.');
             }
         }
@@ -485,15 +485,15 @@ MultiSign.prototype = {
     },
 
     _verifySign: function (item) {
-        let action = item.data.action;
-        if ((action === this.actionVote && !item.votes) ||
-            (action !== this.actionVote && !item.sigs)) {
+        let jsonData = JSON.parse(item.data);
+        let action = jsonData.action;
+        if ((action === this.actionVote && (item.votes === undefined || item.votes == null)) ||
+            (action !== this.actionVote && (item.sigs === undefined || item.sigs == null))) {
             throw ('Data error. ')
         }
 
         let managers = this._getSignees();
         let signers = [];
-        let jsonData = JSON.parse(item.data);
         let n = this._getNumOfNeedsSigners(jsonData);
 
         if (action === this.actionVote) {

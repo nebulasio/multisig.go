@@ -85,7 +85,7 @@ func vote(info map[string]interface{}, key string, voteValue string) error {
     }
 
     for _, v := range ss {
-        d := v.(map[string]string)
+        d := v.(map[string]interface{})
         s, ok := d["sig"]
         if !ok {
             return errors.New("Sig error. ")
