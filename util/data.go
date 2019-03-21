@@ -233,5 +233,6 @@ func PrintData(data map[string]interface{}) {
     action, _ := data["action"]
     fmt.Println("\n============", action, "============")
     detail, _ := data["detail"]
-    fmt.Println(detail)
+    d, _ := json.MarshalIndent(detail, "", "  ")
+    fmt.Println(string(d))
 }

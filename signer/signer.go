@@ -148,10 +148,12 @@ func Sign(filePath string, keyPath string, outputPath string) {
         if action == util.ActionVote {
             votesActions = append(votesActions, func() {
                 util.PrintData(data)
+                fmt.Println()
                 voteValue := util.GetVoteResult()
                 if err := vote(tempItem, key, voteValue); err != nil {
                     util.PrintError(err)
                 }
+                fmt.Println()
             })
         } else {
             printSigDatas = append(printSigDatas, func() {
@@ -169,8 +171,9 @@ func Sign(filePath string, keyPath string, outputPath string) {
     fmt.Println()
     if util.AgreeSig() {
         util.RunActions(sigActions)
-        fmt.Println()
+        util.Print()
     } else {
+        util.Print()
         util.PrintError("You canceled signing the data.")
     }
 

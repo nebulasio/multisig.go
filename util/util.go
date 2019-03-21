@@ -50,19 +50,19 @@ func GetInput(desc string) string {
 }
 
 func AgreeSig() bool {
-    r := GetInput("Do you agree to sign the above data？\n1: agree  2: disagree\nEnter value: ")
+    r := GetInput("Confirm the signature of the above data? \n1: ok  2: cancel\nEnter value: ")
     for !Contains([]interface{}{"1", "2"}, r) {
         Print("\nPlease enter 1 or 2. ")
-        r = GetInput("1: agree  2: disagree \nEnter value: ")
+        r = GetInput("1: ok  2: cancel \nEnter value: ")
     }
     return r == "1"
 }
 
 func GetVoteResult() string {
-    r := GetInput("1: agree  2: disagree  3: abstain\nPlease enter your voting result: ")
+    r := GetInput("Voting values. \n1: agree  2: disagree  3: abstain\nEnter value: ")
     for !Contains([]interface{}{"1", "2", "3"}, r) {
         Print("\nPlease enter 1 or 2 or 3. ")
-        r = GetInput("1: agree   2: disagree  3: abstain\nPlease enter your voting result: ")
+        r = GetInput("1: agree  2: disagree  3: abstain\nEnter value: ")
     }
     i, _ := strconv.Atoi(r)
     return VotingValues[i-1]
