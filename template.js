@@ -19,7 +19,7 @@ function MultiSign() {
     this.sendRulesKey = "send_rules";
     this.sendRulesUpdateLogKey = "send_rules_update_log";
     this.constitutionKey = "constitution";
-    this.constitutionUpdateLogKey = "sys_config_update_log";
+    this.constitutionUpdateLogKey = "constitution_update_log";
 
     this.actionDeleteSignee = "delete-signee";
     this.actionAddSignee = "add-signee";
@@ -343,7 +343,17 @@ MultiSign.prototype = {
 
         let t = parseFloat(item.data.detail.proportionOfAgree) * this._getSignees().length;
         let result = n >= t ? this.voteAgree : this.voteDisagree;
+        if (n >= t) {
+            let action = item.data.detail.approvedAction;
+            if (action) {
+                this._doVoteApprovedAction(action)
+            }
+        }
         this._setVoteData(id, {"data": item.data, "votes": votes, "result": result})
+    },
+
+    _doVoteApprovedAction: function (action) {
+        // TODO:
     },
 
     /**

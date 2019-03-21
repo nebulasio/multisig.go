@@ -128,7 +128,7 @@ func CreateUpdateSendNasRuleData(ruleFilePath string, output string) {
     util.SerializeDataToFile(data, output)
 }
 
-func CreateUpdateSysConfigData(filePath string, output string) {
+func CreateUpdateConstitutionData(filePath string, output string) {
     content, err := util.ReadFile(filePath)
     if err != nil {
         util.PrintError(err)

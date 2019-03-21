@@ -100,7 +100,7 @@ func createData(dataType string) {
 
     case util.ActionUpdateConstitution:
         checkArgsLen(4)
-        tool.CreateUpdateSysConfigData(os.Args[3], output)
+        tool.CreateUpdateConstitutionData(os.Args[3], output)
 
     case "merge-file":
         checkArgsLen(5)

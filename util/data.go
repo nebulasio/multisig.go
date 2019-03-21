@@ -83,7 +83,7 @@ func VerifyData(data map[string]interface{}) (string, string) {
         verifySendNasRule(detail.(map[string]interface{}))
 
     case ActionUpdateConstitution:
-        verifySysConfig(detail.(map[string]interface{}))
+        verifyConstitution(detail.(map[string]interface{}))
 
     case ActionSend:
         v = verifySendNasData(detail.(map[string]interface{}))
@@ -142,15 +142,26 @@ func verifyVoteData(item map[string]interface{}) string {
     if !ok {
         PrintError("vote.content is empty. ")
     }
+
+    action, ok := item["approvedAction"]
+    if ok {
+        verifyVoteApprovedAction(action.(map[string]interface{}))
+    }
+
     p, ok := item["proportionOfApproval"]
     if !ok {
         PrintError("vote.proportionOfApproval is empty. ")
     }
     VerifyProportions(p.(string))
+
     return id.(string)
 }
 
-func verifySysConfig(data map[string]interface{}) {
+func verifyVoteApprovedAction(action map[string]interface{}) {
+    // TODO:
+}
+
+func verifyConstitution(data map[string]interface{}) {
     ver, ok := data["version"]
     if !ok {
         PrintError("version is empty. ")
@@ -172,7 +183,7 @@ func verifySysConfig(data map[string]interface{}) {
         VerifyProportions(v.(string))
     }
     if n != len(ks) {
-        PrintError("sys config data error. ")
+        PrintError("Constitution data error. ")
     }
 }
 
