@@ -18,7 +18,7 @@ func CreateKey(output string) {
         return
     }
 
-    priKey := make([]byte, 32)
+    priKey := make([]byte, 0, 32)
     rand.Read(priKey)
     pubKey, err := secp256k1.GetPublicKey(priKey)
     if err != nil {

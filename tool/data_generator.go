@@ -49,7 +49,7 @@ func CreateSendNasData(txsFilePath string, output string) {
     }
 
     var items []map[string]interface{}
-    ids := make([]interface{}, 10)
+    ids := make([]interface{}, 0, 10)
     for i := 0; i < len(txs); i++ {
         tx := txs[i]
         data := map[string]interface{}{"action": util.ActionSend, "detail": tx}
@@ -86,7 +86,7 @@ func CreateVoteData(voteFilePath string, output string) {
     }
 
     var items []map[string]interface{}
-    ids := make([]interface{}, 10)
+    ids := make([]interface{}, 0, 10)
     for i := 0; i < len(votes); i++ {
         vote := votes[i]
         data := map[string]interface{}{"action": util.ActionVote, "detail": vote}

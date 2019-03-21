@@ -3,6 +3,7 @@ package signer
 import (
     "encoding/hex"
     "errors"
+    "fmt"
     "path/filepath"
     "strings"
     "vote/util"
@@ -55,6 +56,48 @@ func sign(info map[string]interface{}, key string) error {
     return nil
 }
 
+func vote(info map[string]interface{}, key string, voteValue string) error {
+    data, ok := info["data"]
+    if !ok {
+        return errors.New("data error. ")
+    }
+
+    bytesKey, err := hex.DecodeString(key)
+    if err != nil {
+        return err
+    }
+
+    var sig []byte
+    hash := util.Sha3256([]byte(data.(string) + voteValue))
+    sig, err = util.Sign(hash[:], bytesKey)
+    if err != nil {
+        return err
+    }
+
+    strSig := hex.EncodeToString(sig)
+    _, ok = info["votes"]
+    var ss []interface{}
+    if !ok {
+        ss = []interface{}{}
+        info["votes"] = ss
+    } else {
+        ss = info["votes"].([]interface{})
+    }
+
+    for _, v := range ss {
+        d := v.(map[string]string)
+        s, ok := d["sig"]
+        if !ok {
+            return errors.New("Sig error. ")
+        }
+        if s == strSig {
+            return errors.New("you have signed. ")
+        }
+    }
+    info["votes"] = append(ss, map[string]string{"sig": strSig, "value": voteValue})
+    return nil
+}
+
 func Sign(filePath string, keyPath string, outputPath string) {
     if util.IsEmptyString(filePath) {
         util.PrintError("data file path is empty. ")
@@ -77,7 +120,11 @@ func Sign(filePath string, keyPath string, outputPath string) {
     if err != nil {
         util.PrintError(err)
     }
-    ids := make([]interface{}, 10)
+    sendIds := make([]interface{}, 0, 10)
+    voteIds := make([]interface{}, 0, 10)
+    sigActions := make([]func(), 0, 3)
+    votesActions := make([]func(), 0, 3)
+    printSigDatas := make([]func(), 0, 10)
     for _, item := range array {
         d, ok := item["data"]
         if !ok {
@@ -86,14 +133,46 @@ func Sign(filePath string, keyPath string, outputPath string) {
         data := util.DeserializeData(d.(string))
         action, r := util.VerifyData(data)
         if action == util.ActionSend {
-            if util.Contains(ids, r) {
+            if util.Contains(sendIds, r) {
                 util.PrintError("tx.id", r, "has been repeated. ")
             }
-            ids = append(ids, r)
+            sendIds = append(sendIds, r)
+        } else if action == util.ActionVote {
+            if util.Contains(voteIds, r) {
+                util.PrintError("vote.id", r, "has been repeated. ")
+            }
+            voteIds = append(voteIds, r)
         }
-        if err := sign(item, key); err != nil {
-            util.PrintError(err)
+
+        tempItem := item
+        if action == util.ActionVote {
+            votesActions = append(votesActions, func() {
+                util.PrintData(data)
+                voteValue := util.GetVoteResult()
+                if err := vote(tempItem, key, voteValue); err != nil {
+                    util.PrintError(err)
+                }
+            })
+        } else {
+            printSigDatas = append(printSigDatas, func() {
+                util.PrintData(data)
+            })
+            sigActions = append(sigActions, func() {
+                if err := sign(tempItem, key); err != nil {
+                    util.PrintError(err)
+                }
+            })
         }
     }
+    util.RunActions(votesActions)
+    util.RunActions(printSigDatas)
+    fmt.Println()
+    if util.AgreeSig() {
+        util.RunActions(sigActions)
+        fmt.Println()
+    } else {
+        util.PrintError("You canceled signing the data.")
+    }
+
     util.SerializeDataListToFile(array, outputPath)
 }

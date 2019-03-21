@@ -1,6 +1,9 @@
 package util
 
-import "encoding/json"
+import (
+    "encoding/json"
+    "fmt"
+)
 
 func writeDataToFile(r string, outputPath string) {
     if err := WriteFile(outputPath, r); err == nil {
@@ -224,4 +227,11 @@ func verifySendNasRule(data map[string]interface{}) {
     if v != -1 {
         PrintError("Rules error. ")
     }
+}
+
+func PrintData(data map[string]interface{}) {
+    action, _ := data["action"]
+    fmt.Println("\n============", action, "============")
+    detail, _ := data["detail"]
+    fmt.Println(detail)
 }

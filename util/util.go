@@ -8,6 +8,7 @@ import (
     "golang.org/x/crypto/sha3"
     "os"
     "reflect"
+    "strconv"
     "strings"
 )
 
@@ -38,6 +39,38 @@ func VerifyAddress(address string) {
     hash := Sha3256(content[:l-4])
     if !reflect.DeepEqual(hash[:4], content[l-4:]) {
         PrintError(address, "is not a valid nas address.")
+    }
+}
+
+func GetInput(desc string) string {
+    fmt.Print(desc)
+    var r string
+    _, _ = fmt.Scanf("%s", &r)
+    return r
+}
+
+func AgreeSig() bool {
+    r := GetInput("Do you agree to sign the above data？\n1: agree  2: disagree\nEnter value: ")
+    for !Contains([]interface{}{"1", "2"}, r) {
+        Print("\nPlease enter 1 or 2. ")
+        r = GetInput("1: agree  2: disagree \nEnter value: ")
+    }
+    return r == "1"
+}
+
+func GetVoteResult() string {
+    r := GetInput("1: agree  2: disagree  3: abstain\nPlease enter your voting result: ")
+    for !Contains([]interface{}{"1", "2", "3"}, r) {
+        Print("\nPlease enter 1 or 2 or 3. ")
+        r = GetInput("1: agree   2: disagree  3: abstain\nPlease enter your voting result: ")
+    }
+    i, _ := strconv.Atoi(r)
+    return VotingValues[i-1]
+}
+
+func RunActions(actions []func()) {
+    for _, f := range actions {
+        f()
     }
 }
 

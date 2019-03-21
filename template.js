@@ -31,7 +31,7 @@ function MultiSign() {
 
     this.voteAgree = "agree";
     this.voteDisagree = "disagree";
-    this.voteValues = [this.voteAgree, "disagree", "abstain"];
+    this.voteValues = [this.voteAgree, this.voteDisagree, "abstain"];
 
     this.infinity = "INFINITY";
 

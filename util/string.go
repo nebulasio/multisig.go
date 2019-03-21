@@ -18,6 +18,10 @@ const (
     Infinity = "INFINITY"
 )
 
+var (
+    VotingValues = []string{"agree", "disagree", "abstain"}
+)
+
 func VerifyNumber(str string) {
     reg := regexp.MustCompile(`^\d+(\.\d+)?$`)
     if !reg.Match([]byte(str)) {
