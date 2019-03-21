@@ -217,7 +217,7 @@ MultiSign.prototype = {
     },
 
     /**
-     * { "action": "delete_manager", "detail": "n1xxxxx" }
+     * { "action": "removed-signees", "detail": "n1xxxxx" }
      */
     _deleteSignee: function (data, signers) {
         let address = data.detail;
@@ -229,7 +229,7 @@ MultiSign.prototype = {
     },
 
     /**
-     * { "action": "add_manager", "detail": "n1xxxxx" }
+     * { "action": "add-signees", "detail": "n1xxxxx" }
      */
     _addSignee: function (data, signers) {
         let address = data.detail;
@@ -241,7 +241,7 @@ MultiSign.prototype = {
     },
 
     /**
-     * { "action": "replace_manager", "detail": { "oldAddress": "n1xxxxx", "newAddress": "n1yyyy" } }
+     * { "action": "replace-signees", "detail": { "oldAddress": "n1xxxxx", "newAddress": "n1yyyy" } }
      */
     _replaceSignee: function (data, signers) {
         let oldAddress = data.detail.oldAddress;
@@ -260,7 +260,7 @@ MultiSign.prototype = {
     },
 
     /**
-     * { "action": "send_nas", "detail": { "id": "xxx", "to": "n1xxxxx", "value": "0.001" } }
+     * { "action": "send", "detail": { "id": "xxx", "to": "n1xxxxx", "value": "0.001" } }
      */
     _send: function (data, signers) {
         let tx = data.detail;
@@ -283,7 +283,7 @@ MultiSign.prototype = {
 
     /**
      * {
-     *     "action": "update_send_nas_rule",
+     *     "action": "update-rules",
      *     "detail": {
      *          "version": "0",
      *          "rules": [
@@ -331,7 +331,7 @@ MultiSign.prototype = {
 
     /**
      * {
-     *     "action": "update_sys_config",
+     *     "action": "update-constitution",
      *     "detail": {
      *          "version": "0",
      *          "proportionOfSigners": {
@@ -494,8 +494,11 @@ MultiSign.prototype = {
         return "success";
     },
 
-    query: function (dataId) {
-        return this._getData(dataId);
+    query: function () {
+        if (arguments.length === 0) {
+            throw ('Arguments error. ');
+        }
+        return this._getData(arguments[0]);
     },
 
     accept: function () {
