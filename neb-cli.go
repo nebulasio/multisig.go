@@ -19,6 +19,7 @@ contract gen <contract.conf> -o <output_file>                             Create
 
 # data
 data-gen <txs_file> -o <output_data_file>                                 Create 'send nas' data.
+data-gen vote <votes_file> -o <output_data_file>                          Create 'vote' data.
 data-gen remove-signee <address> -o <output_data_file>                    Create 'remove signee' data.
 data-gen add-signee <address> -o <output_data_file>                       Create 'add signee' data.
 data-gen replace-signee <oldAddress> <newAddress> -o <output_data_file>   Create 'replace signee' data.
@@ -116,6 +117,10 @@ func createData(dataType string) {
             util.PrintError("Need at least two files. ")
         }
         tool.MergeData(files, output)
+
+    case "vote":
+        checkArgsLen(4)
+        tool.CreateVoteData(os.Args[3], output)
 
     default:
         checkArgsLen(3)

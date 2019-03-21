@@ -10,9 +10,10 @@ const (
     ActionRemoveSignee       = "remove-signee"
     ActionAddSignee          = "add-signee"
     ActionReplaceSignee      = "replace-signee"
-    ActionSend               = "send"
     ActionUpdateRules        = "update-rules"
     ActionUpdateConstitution = "update-constitution"
+    ActionSend               = "send"
+    ActionVote               = "vote"
 
     Infinity = "INFINITY"
 )

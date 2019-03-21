@@ -1,10 +1,11 @@
 {
-  "version": "1",
+  "version": "0",
   "proportionOfSigners": {
-    "updateSysConfig": "1",
-    "updateSendNasRule": "1",
-    "addManager": "1",
-    "deleteManager": "1",
-    "replaceManager": "1"
+    "updateConstitution": "1",
+    "updateSendRules": "1",
+    "addSignee": "1",
+    "removeSignee": "1",
+    "replaceSignee": "1",
+    "vote": "1"
   }
 }

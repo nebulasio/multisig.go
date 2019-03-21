@@ -11,7 +11,8 @@ function MultiSign() {
     this._constitution = null;
     this._sendRules = null;
 
-    this.dataKeyPrefix = "data_";
+    this.sendDataKeyPrefix = "data_send_";
+    this.voteDataKeyPrefix = "data_vote_";
     this.removedSigneesKey = "removed_signees";
     this.addedSigneesKey = "added_signees";
     this.signeeUpdateLogKey = "signee_update_log";
@@ -23,9 +24,14 @@ function MultiSign() {
     this.actionDeleteSignee = "delete-signee";
     this.actionAddSignee = "add-signee";
     this.actionReplaceSignee = "replace-signee";
-    this.actionSend = "send";
     this.actionUpdateConstitution = "update-constitution";
     this.actionUpdateSendRules = "update-rules";
+    this.actionSend = "send";
+    this.actionVote = "vote";
+
+    this.voteAgree = "agree";
+    this.voteDisagree = "disagree";
+    this.voteValues = [this.voteAgree, "disagree", "abstain"];
 
     this.infinity = "INFINITY";
 
@@ -44,12 +50,20 @@ MultiSign.prototype = {
     init: function () {
     },
 
-    _setData: function (key, data) {
-        this.data.put(this.dataKeyPrefix + key, data);
+    _setSendData: function (key, data) {
+        this.data.put(this.sendDataKeyPrefix + key, data);
     },
 
-    _getData: function (key) {
-        return this.data.get(this.dataKeyPrefix + key);
+    _getSendData: function (key) {
+        return this.data.get(this.sendDataKeyPrefix + key);
+    },
+
+    _setVoteData: function (key, data) {
+        this.data.put(this.voteDataKeyPrefix + key, data);
+    },
+
+    _getVoteData: function (key) {
+        return this.data.get(this.voteDataKeyPrefix + key);
     },
 
     _getConstitution: function () {
@@ -60,11 +74,12 @@ MultiSign.prototype = {
             this._constitution = {
                 "version": "0",
                 "proportionOfSigners": {
-                    "updateSysConfig": "1",
-                    "updateSendNasRule": "1",
-                    "addManager": "1",
-                    "deleteManager": "1",
-                    "replaceManager": "1"
+                    "updateConstitution": "1",
+                    "updateSendRules": "1",
+                    "addSignee": "1",
+                    "removeSignee": "1",
+                    "replaceSignee": "1",
+                    "vote": "1"
                 }
             }
         }
@@ -197,7 +212,7 @@ MultiSign.prototype = {
         for (let i = 0; i < arguments.length; ++i) {
             let p = arguments[i];
             this._checkNumbers(p);
-            p = parseFloat(p)
+            p = parseFloat(p);
             if (p <= 0 || p > 1) {
                 throw ('Proportion error');
             }
@@ -271,14 +286,64 @@ MultiSign.prototype = {
         if (balance.comparedTo(value) < 0) {
             throw ('Insufficient balance.');
         }
-        if (this._getData(tx.id)) {
+        if (this._getSendData(tx.id)) {
             throw (tx.id + ' exists.');
         }
         if (!Blockchain.transfer(tx.to, value)) {
             throw ('Transfer error.');
         }
         data.signers = signers;
-        this._setData(tx.id, data);
+        this._setSendData(tx.id, data);
+    },
+
+    /**
+     * {
+     *     "data": {
+     *         "action": "vote",
+     *         "detail": {
+     *             "id": "xxxxx",
+     *             "content": "test content",
+     *             "proportionOfAgree": "0.8"
+     *         }
+     *     }
+     *     "votes": {
+     *         {
+     *             "value": "agree", // abstain, agree, disagree
+     *             "signer": "n1xxx",
+     *             "sig": "1342abcdef...."
+     *         }
+     *         ...
+     *     }
+     * }
+     */
+    _vote: function (item) {
+        let id = item.data.detail.id;
+        if (!id) {
+            throw ('vote data error. ');
+        }
+
+        if (this._getVoteData(id)) {
+            throw ('The vote ' + id + ' exists.');
+        }
+
+        this._checkProportions(item.data.detail.proportionOfAgree);
+
+        let votes = [];
+        let n = 0;
+        for (let i = 0; i < item.votes.length; ++i) {
+            let vote = item.votes[i];
+            if (this.voteValues.indexOf(vote.value) < 0) {
+                throw ('Vote value "' + vote.value + '" error. ');
+            }
+            if (vote.value === this.voteAgree) {
+                n++;
+            }
+            votes.push({"signer": vote.signer, "value": vote.value});
+        }
+
+        let t = parseFloat(item.data.detail.proportionOfAgree) * this._getSignees().length;
+        let result = n >= t ? this.voteAgree : this.voteDisagree;
+        this._setVoteData(id, {"data": item.data, "votes": votes, "result": result})
     },
 
     /**
@@ -335,11 +400,12 @@ MultiSign.prototype = {
      *     "detail": {
      *          "version": "0",
      *          "proportionOfSigners": {
-     *              "updateSysConfig": "1",
-     *              "updateSendNasRule": "1",
-     *              "addManager": "1",
-     *              "deleteManager": "1",
-     *              "replaceManager": "1"
+     *              "updateConstitution": "1",
+     *              "updateSendRules": "1",
+     *              "addSignee": "1",
+     *              "removeSignee": "1",
+     *              "replaceSignee": "1",
+     *              "vote": "1"
      *          }
      *     }
      * }
@@ -352,8 +418,9 @@ MultiSign.prototype = {
         }
         let ps = data.detail.proportionOfSigners;
         this._checkProportions(
-            ps.updateSysConfig, ps.updateSendNasRule,
-            ps.addManager, ps.deleteManager, ps.replaceManager
+            ps.updateConstitution, ps.updateSendRules,
+            ps.addSignee, ps.removeSignee, ps.replaceSignee,
+            ps.vote
         );
         let config = data.detail;
         this._constitution = config;
@@ -382,22 +449,25 @@ MultiSign.prototype = {
         let p = this._getConstitution().proportionOfSigners;
         switch (data.action) {
             case this.actionAddSignee:
-                return this._getSignees().length * parseFloat(p.addManager);
+                return this._getSignees().length * parseFloat(p.addSignee);
 
             case this.actionDeleteSignee:
-                return (this._getSignees().length - 1) * parseFloat(p.deleteManager);
+                return (this._getSignees().length - 1) * parseFloat(p.removeSignee);
 
             case this.actionReplaceSignee:
-                return (this._getSignees().length - 1) * parseFloat(p.replaceManager);
+                return (this._getSignees().length - 1) * parseFloat(p.replaceSignee);
 
             case this.actionUpdateConstitution:
-                return this._getSignees().length * parseFloat(p.updateSysConfig);
+                return this._getSignees().length * parseFloat(p.updateConstitution);
 
             case this.actionUpdateSendRules:
-                return this._getSignees().length * parseFloat(p.updateSendNasRule);
+                return this._getSignees().length * parseFloat(p.updateSendRules);
 
             case this.actionSend:
                 return this._getNumOfNeedsSignersWithSendNasConfig(data);
+
+            case this.actionVote:
+                return this._getSignees().length * parseFloat(p.vote);
 
             default:
                 throw ('Action ' + data.action + ' is not supported.');
@@ -405,34 +475,61 @@ MultiSign.prototype = {
     },
 
     _verifySign: function (item) {
+        let action = item.data.action;
+        if ((action === this.actionVote && !item.votes) ||
+            (action !== this.actionVote && !item.sigs)) {
+            throw ('Data error. ')
+        }
+
         let managers = this._getSignees();
         let signers = [];
+        let jsonData = JSON.parse(item.data);
+        let n = this._getNumOfNeedsSigners(jsonData);
 
-        let hash = crypto.sha3256(item.data);
-        item.data = JSON.parse(item.data);
-        let n = this._getNumOfNeedsSigners(item.data);
-        if (item.sigs == null || item.sigs.length < n) {
-            throw ('Minimum ' + n + ' signatures required.');
-        }
-
-        for (let j = 0; j < item.sigs.length; ++j) {
-            let s = item.sigs[j];
-            let a = crypto.recoverAddress(1, hash, s);
-            if (a != null && managers.indexOf(a) >= 0) {
-                if (signers.indexOf(a) >= 0) {
-                    throw ('Signature "' + s + '" is repeated.');
+        if (action === this.actionVote) {
+            if (item.votes.length < n) {
+                throw ('Minimum ' + n + ' voters required.');
+            }
+            for (let j = 0; j < item.votes.length; ++j) {
+                let v = item.votes[j];
+                let hash = crypto.sha3256(item.data + v.value);
+                let a = crypto.recoverAddress(1, hash, v.sig);
+                if (a != null && managers.indexOf(a) >= 0) {
+                    if (signers.indexOf(a) >= 0) {
+                        throw ('Signature "' + v.sig + '" is repeated.');
+                    } else {
+                        signers.push(a);
+                        v.signer = a;
+                    }
                 } else {
-                    signers.push(a);
+                    throw ('Signature "' + v.sig + '" error.');
                 }
-            } else {
-                throw ('Signature "' + s + '" error.');
+            }
+        } else {
+            if (item.sigs.length < n) {
+                throw ('Minimum ' + n + ' signatures required.');
+            }
+            let hash = crypto.sha3256(item.data);
+            for (let j = 0; j < item.sigs.length; ++j) {
+                let s = item.sigs[j];
+                let a = crypto.recoverAddress(1, hash, s);
+                if (a != null && managers.indexOf(a) >= 0) {
+                    if (signers.indexOf(a) >= 0) {
+                        throw ('Signature "' + s + '" is repeated.');
+                    } else {
+                        signers.push(a);
+                    }
+                } else {
+                    throw ('Signature "' + s + '" error.');
+                }
             }
         }
-
+        item.data = jsonData;
         return signers;
     },
 
-    _execute: function (data, signers) {
+    _execute: function (item, signers) {
+        let data = item.data;
         switch (data.action) {
             case this.actionAddSignee:
                 this._addSignee(data, signers);
@@ -443,14 +540,17 @@ MultiSign.prototype = {
             case this.actionReplaceSignee:
                 this._replaceSignee(data, signers);
                 break;
-            case this.actionSend:
-                this._send(data, signers);
-                break;
             case this.actionUpdateSendRules:
                 this._updateSendRules(data, signers);
                 break;
             case this.actionUpdateConstitution:
                 this._updateConstitution(data, signers);
+                break;
+            case this.actionSend:
+                this._send(data, signers);
+                break;
+            case this.actionVote:
+                this._vote(item);
                 break;
             default:
                 throw ('Action ' + data.action + ' is not supported.');
@@ -489,16 +589,23 @@ MultiSign.prototype = {
         for (let i = 0; i < array.length; ++i) {
             let item = array[i];
             let signers = this._verifySign(item);
-            this._execute(item.data, signers);
+            this._execute(item, signers);
         }
         return "success";
     },
 
-    query: function () {
+    querySentData: function () {
         if (arguments.length === 0) {
             throw ('Arguments error. ');
         }
-        return this._getData(arguments[0]);
+        return this._getSendData(arguments[0]);
+    },
+
+    queryVotingData: function () {
+        if (arguments.length === 0) {
+            throw ('Arguments error. ');
+        }
+        return this._getVoteData(arguments[0]);
     },
 
     accept: function () {

@@ -76,14 +76,17 @@ func VerifyData(data map[string]interface{}) (string, string) {
     case ActionReplaceSignee:
         verifyReplaceManagerData(detail.(map[string]interface{}))
 
-    case ActionSend:
-        v = verifySendNasData(detail.(map[string]interface{}))
-
     case ActionUpdateRules:
         verifySendNasRule(detail.(map[string]interface{}))
 
     case ActionUpdateConstitution:
         verifySysConfig(detail.(map[string]interface{}))
+
+    case ActionSend:
+        v = verifySendNasData(detail.(map[string]interface{}))
+
+    case ActionVote:
+        v = verifyVoteData(detail.(map[string]interface{}))
 
     default:
         PrintError("Action", action, "is not supported.")
@@ -127,6 +130,23 @@ func verifySendNasData(item map[string]interface{}) string {
     return id.(string)
 }
 
+func verifyVoteData(item map[string]interface{}) string {
+    id, ok := item["id"]
+    if !ok || IsEmptyString(id.(string)) {
+        PrintError("vote.id is empty. ")
+    }
+    _, ok = item["content"]
+    if !ok {
+        PrintError("vote.content is empty. ")
+    }
+    p, ok := item["proportionOfApproval"]
+    if !ok {
+        PrintError("vote.proportionOfApproval is empty. ")
+    }
+    VerifyProportions(p.(string))
+    return id.(string)
+}
+
 func verifySysConfig(data map[string]interface{}) {
     ver, ok := data["version"]
     if !ok {
@@ -140,7 +160,7 @@ func verifySysConfig(data map[string]interface{}) {
     }
 
     p := t.(map[string]interface{})
-    ks := []interface{}{"updateSysConfig", "updateSendNasRule", "addManager", "deleteManager", "replaceManager"}
+    ks := []interface{}{"updateConstitution", "updateSendRules", "addSignee", "removeSignee", "replaceSignee", "vote"}
     n := 0
     for k, v := range p {
         if Contains(ks, k) {

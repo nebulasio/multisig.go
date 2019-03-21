@@ -71,6 +71,43 @@ func CreateSendNasData(txsFilePath string, output string) {
     util.SerializeDataListToFile(items, output)
 }
 
+func CreateVoteData(voteFilePath string, output string) {
+    content, err := util.ReadFile(voteFilePath)
+    if err != nil {
+        util.PrintError(err)
+        return
+    }
+
+    var votes []interface{}
+    err = json.Unmarshal([]byte(content), &votes)
+    if err != nil {
+        util.PrintError(err)
+        return
+    }
+
+    var items []map[string]interface{}
+    ids := make([]interface{}, 10)
+    for i := 0; i < len(votes); i++ {
+        vote := votes[i]
+        data := map[string]interface{}{"action": util.ActionVote, "detail": vote}
+        _, id := util.VerifyData(data)
+        if util.Contains(ids, id) {
+            util.PrintError("vote.id", id, "has been repeated. ")
+        }
+        ids = append(ids, id)
+        item := util.CreateContractData(data)
+        if item == nil {
+            return
+        }
+        items = append(items, item)
+    }
+
+    if util.IsEmptyString(output) {
+        output = filepath.Join("output", "vote.json")
+    }
+    util.SerializeDataListToFile(items, output)
+}
+
 func CreateUpdateSendNasRuleData(ruleFilePath string, output string) {
     content, err := util.ReadFile(ruleFilePath)
     if err != nil {
