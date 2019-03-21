@@ -481,8 +481,8 @@ MultiSign.prototype = {
         return this._getLogs(this.constitutionUpdateLogKey);
     },
 
-    execute: function (array) {
-        array = JSON.parse(array);
+    execute: function () {
+        let array = arguments;
         if (array == null || array.length === 0) {
             throw('Data is empty');
         }

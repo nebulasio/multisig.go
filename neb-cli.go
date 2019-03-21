@@ -11,11 +11,11 @@ import (
 const helpString = `Command list.
 
 # create key & signature
-account create                        Create a private key.
-sign <data_file> -o <output_file>     Sign the data file.
+account create -o <output_file>          Create a private key.
+sign <data_file> -o <output_file>        Sign the data file.
 
 # contract
-contract gen <contract.conf> -o <output_data_file>                        Create contract.
+contract gen <contract.conf> -o <output_file>                             Create contract.
 
 # data
 data-gen <txs_file> -o <output_data_file>                                 Create 'send nas' data.

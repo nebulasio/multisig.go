@@ -24,17 +24,10 @@ func SerializeDataToFile(data interface{}, outputPath string) {
 }
 
 func SerializeDataListToFile(data []map[string]interface{}, outputPath string) {
-    d, err := json.Marshal(data)
+    r, err := json.Marshal(data)
     if err != nil {
         PrintError(err)
     }
-
-    a := []string{string(d)}
-    r, e := json.Marshal(a)
-    if e != nil {
-        PrintError(e)
-    }
-
     writeDataToFile(string(r), outputPath)
 }
 
@@ -44,14 +37,8 @@ func DeserializeDataFile(file string) ([]map[string]interface{}, error) {
         return nil, err
     }
 
-    var container []string
-    err = json.Unmarshal([]byte(text), &container)
-    if err != nil {
-        return nil, err
-    }
-
     var r []map[string]interface{}
-    err = json.Unmarshal([]byte(container[0]), &r)
+    err = json.Unmarshal([]byte(text), &r)
     if err != nil {
         return nil, err
     }
