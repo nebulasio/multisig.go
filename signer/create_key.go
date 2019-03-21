@@ -7,14 +7,14 @@ import (
     "vote/util"
 )
 
-const (
-    keyFile = "key.txt"
-)
+func CreateKey(output string) {
 
-func CreateKey() {
+    if util.IsEmptyString(output) {
+        output = "key.txt"
+    }
 
-    if util.ExistsFile(keyFile) {
-        util.PrintError(keyFile, "exists.")
+    if util.ExistsFile(output) {
+        util.PrintError(output, "exists.")
         return
     }
 
@@ -31,9 +31,9 @@ func CreateKey() {
     hash = util.Sha3256(content)
     content = append(content, hash[0:4]...)
     address := util.B58Encode(content)
-    if err := util.WriteFile(keyFile, hex.EncodeToString(priKey)+" "+address); err != nil {
+    if err := util.WriteFile(output, hex.EncodeToString(priKey)+" "+address); err != nil {
         util.PrintError(err)
     } else {
-        util.Print("success. ->", keyFile)
+        util.Print("success. ->", output)
     }
 }

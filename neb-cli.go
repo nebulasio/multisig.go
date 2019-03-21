@@ -51,8 +51,10 @@ func checkArgsLen(length int) {
 
 func executeAccountCmd(cmd string) {
     switch cmd {
+
     case "create":
-        signer.CreateKey()
+        signer.CreateKey(getOutputPath())
+
     default:
         util.PrintError("Unknown cmd:", cmd)
     }
@@ -63,7 +65,7 @@ func executeContractCmd(cmd string) {
 
     case "gen":
         checkArgsLen(4)
-        tool.CreateContract(os.Args[3])
+        tool.CreateContract(os.Args[3], getOutputPath())
 
     case "deploy":
         // TODO:

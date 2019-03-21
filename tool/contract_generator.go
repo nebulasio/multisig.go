@@ -7,7 +7,7 @@ import (
     "vote/util"
 )
 
-func CreateContract(filePath string) {
+func CreateContract(filePath string, output string) {
 
     text, err := util.ReadFile(filePath)
     if err != nil {
@@ -46,14 +46,16 @@ func CreateContract(filePath string) {
         return
     }
 
-    outputPath := filepath.Join("output", "contract.js")
+    if util.IsEmptyString(output) {
+        output = filepath.Join("output", "contract.js")
+    }
     if data, err := json.Marshal(addrs); err == nil {
         text = strings.Replace(text, "SIGNEES", string(data), -1)
-        if err := util.WriteFile(outputPath, text); err != nil {
+        if err := util.WriteFile(output, text); err != nil {
             util.PrintError(err)
             return
         }
     }
 
-    util.Print("success. ->", outputPath)
+    util.Print("success. ->", output)
 }
