@@ -1,0 +1,41 @@
+{
+  "signees": {
+    "signees_count": 3,
+    "addresses": [
+      "n1Hb8rKQodFjQdksf8BDhbnnqgVrEDHLRC8",
+      "n1dn3ZjJPRnL4UdePFkwQ5b9AJqPxnsQvM2",
+      "n1ckLKYqUTSjgoEeV4HDtbTUg8pb38vmP68"
+    ]
+  },
+  "constitution": {
+    "version": "0",
+    "proportionOfSigners": {
+      "updateConstitution": "1",
+      "updateSendRules": "1",
+      "addSignee": "1",
+      "removeSignee": "1",
+      "replaceSignee": "1",
+      "vote": "1"
+    }
+  },
+  "rules": {
+    "version": "0",
+    "rules": [
+      {
+        "startValue": "0",
+        "endValue": "0.5",
+        "proportionOfSigners": "0.3"
+      },
+      {
+        "startValue": "0.5",
+        "endValue": "1",
+        "proportionOfSigners": "0.5"
+      },
+      {
+        "startValue": "1",
+        "endValue": "INFINITY",
+        "proportionOfSigners": "1"
+      }
+    ]
+  }
+}

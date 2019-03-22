@@ -80,10 +80,10 @@ func VerifyData(data map[string]interface{}) (string, string) {
         verifyReplaceManagerData(detail.(map[string]interface{}))
 
     case ActionUpdateRules:
-        verifySendNasRule(detail.(map[string]interface{}))
+        VerifySendRules(detail.(map[string]interface{}))
 
     case ActionUpdateConstitution:
-        verifyConstitution(detail.(map[string]interface{}))
+        VerifyConstitution(detail.(map[string]interface{}))
 
     case ActionSend:
         v = verifySendNasData(detail.(map[string]interface{}))
@@ -148,9 +148,9 @@ func verifyVoteData(item map[string]interface{}) string {
         verifyVoteApprovedAction(action.(map[string]interface{}))
     }
 
-    p, ok := item["proportionOfAgree"]
+    p, ok := item["proportionOfApproved"]
     if !ok {
-        PrintError("vote.proportionOfAgree is empty. ")
+        PrintError("vote.proportionOfApproved is empty. ")
     }
     VerifyProportions(p.(string))
 
@@ -161,7 +161,7 @@ func verifyVoteApprovedAction(action map[string]interface{}) {
     // TODO:
 }
 
-func verifyConstitution(data map[string]interface{}) {
+func VerifyConstitution(data map[string]interface{}) {
     ver, ok := data["version"]
     if !ok {
         PrintError("version is empty. ")
@@ -187,7 +187,7 @@ func verifyConstitution(data map[string]interface{}) {
     }
 }
 
-func verifySendNasRule(data map[string]interface{}) {
+func VerifySendRules(data map[string]interface{}) {
     ver, ok := data["version"]
     if !ok {
         PrintError("version is empty. ")

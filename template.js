@@ -71,17 +71,7 @@ MultiSign.prototype = {
             this._constitution = this.data.get(this.constitutionKey);
         }
         if (!this._constitution) {
-            this._constitution = {
-                "version": "0",
-                "proportionOfSigners": {
-                    "updateConstitution": "1",
-                    "updateSendRules": "1",
-                    "addSignee": "1",
-                    "removeSignee": "1",
-                    "replaceSignee": "1",
-                    "vote": "1"
-                }
-            }
+            this._constitution = CONSTITUTION;
         }
         return this._constitution;
     },
@@ -91,27 +81,7 @@ MultiSign.prototype = {
             this._sendRules = this.data.get(this.sendRulesKey);
         }
         if (!this._sendRules) {
-            // TODO: Confirm the default rules when going online
-            this._sendRules = {
-                "version": "0",
-                "rules": [
-                    {
-                        "startValue": "0",
-                        "endValue": "0.5",
-                        "proportionOfSigners": "0.3"
-                    },
-                    {
-                        "startValue": "0.5",
-                        "endValue": "1",
-                        "proportionOfSigners": "0.5"
-                    },
-                    {
-                        "startValue": "1",
-                        "endValue": this.infinity,
-                        "proportionOfSigners": "1"
-                    }
-                ]
-            };
+            this._sendRules = RULES;
         }
         return this._sendRules;
     },
@@ -303,7 +273,7 @@ MultiSign.prototype = {
      *         "detail": {
      *             "id": "xxxxx",
      *             "content": "test content",
-     *             "proportionOfAgree": "0.8"
+     *             "proportionOfApproved": "0.8"
      *         }
      *     }
      *     "votes": {
@@ -326,7 +296,7 @@ MultiSign.prototype = {
             throw ('The vote ' + id + ' exists.');
         }
 
-        this._checkProportions(item.data.detail.proportionOfAgree);
+        this._checkProportions(item.data.detail.proportionOfApproved);
 
         let votes = [];
         let n = 0;
@@ -341,7 +311,7 @@ MultiSign.prototype = {
             votes.push({"signer": vote.signer, "value": vote.value});
         }
 
-        let t = parseFloat(item.data.detail.proportionOfAgree) * this._getSignees().length;
+        let t = parseFloat(item.data.detail.proportionOfApproved) * this._getSignees().length;
         let result = n >= t ? this.voteAgree : this.voteDisagree;
         if (n >= t) {
             let action = item.data.detail.approvedAction;

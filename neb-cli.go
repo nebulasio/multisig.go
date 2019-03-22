@@ -46,7 +46,7 @@ func getOutputPath() string {
 
 func checkArgsLen(length int) {
     if len(os.Args) < length {
-        util.PrintError("param error. ")
+        util.PrintError("Arguments error. ")
     }
 }
 
