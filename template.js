@@ -316,14 +316,31 @@ MultiSign.prototype = {
         if (n >= t) {
             let action = item.data.detail.approvedAction;
             if (action) {
-                this._doVoteApprovedAction(action)
+                this._doVoteAction(action)
             }
         }
         this._setVoteData(id, {"data": item.data, "votes": votes, "result": result})
     },
 
-    _doVoteApprovedAction: function (action) {
-        // TODO:
+    _doVoteAction: function (action) {
+        switch (action.name) {
+            case 'callContract':
+                this._doCallContract(action.detail);
+                break;
+            default:
+                throw ('Unknown action: ' + action.name);
+        }
+    },
+
+    _doCallContract: function (detail) {
+        this._verifyAddresses(detail.address);
+        let args = detail.args;
+        if (!detail.func || !args) {
+            throw ('call contract "' + detail.address + '" function or args is null.');
+        }
+        args.splice(0, 0, detail.func);
+        let c = new Blockchain.Contract(detail.address);
+        c.value(0).call.apply(c, args);
     },
 
     /**

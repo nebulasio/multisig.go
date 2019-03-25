@@ -156,13 +156,9 @@ func MergeData(files []string, output string) {
             util.PrintError(err)
         }
         for _, container := range array {
-            str, ok := container["data"]
-            if !ok {
-                util.PrintError("Data error. ")
-            } else {
-                data := util.DeserializeData(str.(string))
-                util.VerifyData(data)
-            }
+            strData := util.GetStringField(container, "data")
+            data := util.DeserializeData(strData)
+            util.VerifyData(data)
         }
         r = append(r, array...)
     }

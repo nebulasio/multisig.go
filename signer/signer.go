@@ -22,10 +22,7 @@ func readKey(keyPath string) (string, error) {
 }
 
 func sign(info map[string]interface{}, key string) error {
-    data, ok := info["data"]
-    if !ok {
-        return errors.New("data error. ")
-    }
+    data := util.VerifyAndGetField(info, "data")
 
     bytesKey, err := hex.DecodeString(key)
     if err != nil {
@@ -33,7 +30,7 @@ func sign(info map[string]interface{}, key string) error {
     }
 
     var sig []byte
-    hash := util.Sha3256([]byte(data.(string)))
+    hash := util.Sha3256([]byte(util.ToString(data)))
     sig, err = util.Sign(hash[:], bytesKey)
     if err != nil {
         return err
@@ -46,7 +43,7 @@ func sign(info map[string]interface{}, key string) error {
         ss = []interface{}{}
         info["sigs"] = ss
     } else {
-        ss = info["sigs"].([]interface{})
+        ss = util.ToSlice(info["sigs"])
     }
     if util.Contains(ss, strSig) {
         return errors.New("you have signed. ")
@@ -57,10 +54,7 @@ func sign(info map[string]interface{}, key string) error {
 }
 
 func vote(info map[string]interface{}, key string, voteValue string) error {
-    data, ok := info["data"]
-    if !ok {
-        return errors.New("data error. ")
-    }
+    data := util.VerifyAndGetField(info, "data")
 
     bytesKey, err := hex.DecodeString(key)
     if err != nil {
@@ -68,28 +62,25 @@ func vote(info map[string]interface{}, key string, voteValue string) error {
     }
 
     var sig []byte
-    hash := util.Sha3256([]byte(data.(string) + voteValue))
+    hash := util.Sha3256([]byte(util.ToString(data) + voteValue))
     sig, err = util.Sign(hash[:], bytesKey)
     if err != nil {
         return err
     }
 
     strSig := hex.EncodeToString(sig)
-    _, ok = info["votes"]
+    _, c := info["votes"]
     var ss []interface{}
-    if !ok {
+    if !c {
         ss = []interface{}{}
         info["votes"] = ss
     } else {
-        ss = info["votes"].([]interface{})
+        ss = util.ToSlice(info["votes"])
     }
 
     for _, v := range ss {
-        d := v.(map[string]interface{})
-        s, ok := d["sig"]
-        if !ok {
-            return errors.New("Sig error. ")
-        }
+        d := util.ToMap(v)
+        s := util.GetStringField(d, "sig")
         if s == strSig {
             return errors.New("you have signed. ")
         }
@@ -126,11 +117,8 @@ func Sign(filePath string, keyPath string, outputPath string) {
     votesActions := make([]func(), 0, 3)
     printSigDatas := make([]func(), 0, 10)
     for _, item := range array {
-        d, ok := item["data"]
-        if !ok {
-            util.PrintError("Data error.")
-        }
-        data := util.DeserializeData(d.(string))
+        d := util.GetStringField(item, "data")
+        data := util.DeserializeData(d)
         action, r := util.VerifyData(data)
         if action == util.ActionSend {
             if util.Contains(sendIds, r) {

@@ -58,129 +58,83 @@ func DeserializeData(data string) map[string]interface{} {
 }
 
 func VerifyData(data map[string]interface{}) (string, string) {
-    action, ok := data["action"]
-    if !ok {
-        PrintError("Data error.")
-    }
-
-    detail, ok := data["detail"]
-    if !ok {
-        PrintError("Data error.")
-    }
+    action := GetStringField(data, "action")
+    detail := VerifyAndGetField(data, "detail")
 
     v := ""
     switch action {
     case ActionRemoveSignee:
-        VerifyAddress(detail.(string))
+        VerifyAddress(ToString(detail))
 
     case ActionAddSignee:
-        VerifyAddress(detail.(string))
+        VerifyAddress(ToString(detail))
 
     case ActionReplaceSignee:
-        verifyReplaceManagerData(detail.(map[string]interface{}))
+        verifyReplaceManagerData(ToMap(detail))
 
     case ActionUpdateRules:
-        VerifySendRules(detail.(map[string]interface{}))
+        VerifySendRules(ToMap(detail))
 
     case ActionUpdateConstitution:
-        VerifyConstitution(detail.(map[string]interface{}))
+        VerifyConstitution(ToMap(detail))
 
     case ActionSend:
-        v = verifySendNasData(detail.(map[string]interface{}))
+        v = verifySendNasData(ToMap(detail))
 
     case ActionVote:
-        v = verifyVoteData(detail.(map[string]interface{}))
+        v = verifyVoteData(ToMap(detail))
 
     default:
         PrintError("Action", action, "is not supported.")
     }
-    return action.(string), v
+    return action, v
 }
 
 func verifyReplaceManagerData(data map[string]interface{}) {
-    oldAddress, ok := data["oldAddress"]
-    if !ok {
-        PrintError("oldAddress is empty. ")
-    }
+    oldAddress := GetStringField(data, "oldAddress")
+    newAddress := GetStringField(data, "newAddress")
 
-    newAddress, ok := data["newAddress"]
-    if !ok {
-        PrintError("newAddress is empty. ")
-    }
-
-    VerifyAddress(oldAddress.(string))
-    VerifyAddress(newAddress.(string))
+    VerifyAddress(oldAddress)
+    VerifyAddress(newAddress)
     if oldAddress == newAddress {
         PrintError("Data error. ")
     }
 }
 
 func verifySendNasData(item map[string]interface{}) string {
-    id, ok := item["id"]
-    if !ok || IsEmptyString(id.(string)) {
-        PrintError("tx.id is empty. ")
-    }
-    to, ok := item["to"]
-    if !ok {
-        PrintError("tx.to is empty. ")
-    }
-    VerifyAddress(to.(string))
-    value, ok := item["value"]
-    if !ok {
-        PrintError("tx.value is empty. ")
-    }
-    VerifyNumber(value.(string))
-    return id.(string)
+    id := GetNotEmptyStringField(item, "id")
+    to := GetStringField(item, "to")
+    VerifyAddress(to)
+    value := GetStringField(item, "value")
+    VerifyNumber(value)
+    return id
 }
 
 func verifyVoteData(item map[string]interface{}) string {
-    id, ok := item["id"]
-    if !ok || IsEmptyString(id.(string)) {
-        PrintError("vote.id is empty. ")
-    }
-    _, ok = item["content"]
-    if !ok {
-        PrintError("vote.content is empty. ")
-    }
+    id := GetNotEmptyStringField(item, "id")
+    _ = GetStringField(item, "content")
 
-    action, ok := item["approvedAction"]
-    if ok {
-        verifyVoteApprovedAction(action.(map[string]interface{}))
-    }
+    p := GetStringField(item, "proportionOfApproved")
+    VerifyProportions(p)
 
-    p, ok := item["proportionOfApproved"]
-    if !ok {
-        PrintError("vote.proportionOfApproved is empty. ")
-    }
-    VerifyProportions(p.(string))
+    action := VerifyAndGetField(item, "approvedAction")
+    verifyVoteAction(ToMap(action))
 
-    return id.(string)
-}
-
-func verifyVoteApprovedAction(action map[string]interface{}) {
-    // TODO:
+    return id
 }
 
 func VerifyConstitution(data map[string]interface{}) {
-    ver, ok := data["version"]
-    if !ok {
-        PrintError("version is empty. ")
-    }
-    VerifyNumber(ver.(string))
+    ver := GetStringField(data, "version")
+    VerifyNumber(ver)
 
-    t, ok := data["proportionOfSigners"]
-    if !ok {
-        PrintError("proportionOfSigners is empty. ")
-    }
-
-    p := t.(map[string]interface{})
+    p := GetMapField(data, "proportionOfSigners")
     ks := []interface{}{"updateConstitution", "updateSendRules", "addSignee", "removeSignee", "replaceSignee", "vote"}
     n := 0
     for k, v := range p {
         if Contains(ks, k) {
             n++
         }
-        VerifyProportions(v.(string))
+        VerifyProportions(ToString(v))
     }
     if n != len(ks) {
         PrintError("Constitution data error. ")
@@ -188,46 +142,31 @@ func VerifyConstitution(data map[string]interface{}) {
 }
 
 func VerifySendRules(data map[string]interface{}) {
-    ver, ok := data["version"]
-    if !ok {
-        PrintError("version is empty. ")
-    }
-    VerifyNumber(ver.(string))
+    ver := GetStringField(data, "version")
+    VerifyNumber(ver)
 
-    t, ok := data["rules"]
-    if !ok {
-        PrintError("rules is empty. ")
-    }
-
-    rules := t.([]interface{})
+    rules := GetSliceField(data, "rules")
     if len(rules) <= 0 {
         PrintError("rules is empty. ")
     }
 
     v := 0.0
     for _, i := range rules {
-        r := i.(map[string]interface{})
-        p, ok := r["proportionOfSigners"]
-        if !ok {
-            PrintError("proportionOfSigners is empty. ")
-        }
-        VerifyProportions(p.(string))
+        r := ToMap(i)
 
-        t, ok := r["startValue"]
-        if !ok {
-            PrintError("startValue is empty. ")
-        }
-        startValue := ParseFloat(t.(string))
+        p := GetStringField(r, "proportionOfSigners")
+        VerifyProportions(p)
+
+        t := GetStringField(r, "startValue")
+        startValue := ParseFloat(t)
+
         if v == -1 || startValue != v {
             PrintError("Rules error. ", startValue, v)
         }
 
-        e, ok := r["endValue"]
-        if !ok {
-            PrintError("endValue is empty. ")
-        }
+        e := GetStringField(r, "endValue")
         if e != Infinity {
-            v = ParseFloat(e.(string))
+            v = ParseFloat(e)
             if startValue >= v {
                 PrintError("Rules error. ")
             }

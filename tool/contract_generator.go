@@ -8,24 +8,15 @@ import (
 )
 
 func verifyAndGetSignees(config map[string]interface{}) string {
-    c, ok := config["signees_count"]
-    if !ok {
-        util.PrintError("No fields found for 'signees_count'. ")
-    }
-    count := int(c.(float64))
+    c := util.VerifyAndGetField(config, "signees_count")
+    count := int(util.ToNumber(c))
 
-    array, ok := config["addresses"]
-    if !ok {
-        util.PrintError("No fields found for 'addresses'. ")
-    }
-
-    addresses := array.([]interface{})
+    addresses := util.GetSliceField(config, "addresses")
     if addresses == nil || len(addresses) < count {
         util.PrintError("The number of addresses should be", count)
     }
-
     for _, a := range addresses {
-        util.VerifyAddress(a.(string))
+        util.VerifyAddress(util.ToString(a))
     }
 
     if data, err := json.Marshal(addresses); err == nil {
@@ -63,27 +54,18 @@ func CreateContract(filePath string, output string) {
         util.PrintError(err)
     }
 
-    var configs map[string]map[string]interface{}
+    var configs map[string]interface{}
     if err = json.Unmarshal([]byte(text), &configs); err != nil {
         util.PrintError(err)
     }
 
-    config, ok := configs["signees"]
-    if !ok {
-        util.PrintError("'signees' field cannot be empty")
-    }
+    config := util.GetMapField(configs, "signees")
     signees := verifyAndGetSignees(config)
 
-    config, ok = configs["constitution"]
-    if !ok {
-        util.PrintError("'constitution' field cannot be empty")
-    }
+    config = util.GetMapField(configs, "constitution")
     constitution := verifyAndGetConstitution(config)
 
-    config, ok = configs["rules"]
-    if !ok {
-        util.PrintError("'rules' field cannot be empty")
-    }
+    config = util.GetMapField(configs, "rules")
     rules := verifyAndGetRules(config)
 
     text, err = util.ReadFile("template.js")

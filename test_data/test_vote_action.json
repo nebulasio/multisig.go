@@ -1,0 +1,8 @@
+{
+  "name": "callContract",
+  "detail": {
+    "address": "n1sMAKzCsAFhx5h4STcAgHc9y4VcxMSTzhx",
+    "func": "getSignees",
+    "args": []
+  }
+}
