@@ -24,6 +24,17 @@ var (
     VotingValues = []string{"agree", "disagree", "abstain"}
 )
 
+func SplitAndRemoveEmpty(s string, sep string) []string {
+    t := strings.Split(s, sep)
+    r := make([]string, 0, len(t))
+    for _, i := range t {
+        if !IsEmptyString(i) {
+            r = append(r, i)
+        }
+    }
+    return r
+}
+
 func IsEmptyString(str string) bool {
     return strings.Trim(str, " ") == ""
 }

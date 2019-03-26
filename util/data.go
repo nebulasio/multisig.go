@@ -59,7 +59,7 @@ func DeserializeData(data string) map[string]interface{} {
 
 func VerifyData(data map[string]interface{}) (string, string) {
     action := GetStringField(data, "action")
-    detail := VerifyAndGetField(data, "detail")
+    detail := GetField(data, "detail")
 
     v := ""
     switch action {
@@ -117,7 +117,7 @@ func verifyVoteData(item map[string]interface{}) string {
     p := GetStringField(item, "proportionOfApproved")
     VerifyProportions(p)
 
-    action := VerifyAndGetField(item, "approvedAction")
+    action := GetField(item, "approvedAction")
     verifyVoteAction(ToMap(action))
 
     return id

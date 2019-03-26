@@ -8,7 +8,7 @@ import (
 )
 
 func verifyAndGetSignees(config map[string]interface{}) string {
-    c := util.VerifyAndGetField(config, "signees_count")
+    c := util.GetField(config, "signees_count")
     count := int(util.ToNumber(c))
 
     addresses := util.GetSliceField(config, "addresses")
@@ -47,7 +47,7 @@ func verifyAndGetRules(config map[string]interface{}) string {
     }
 }
 
-func CreateContract(filePath string, output string) {
+func CreateContract(templatePath string, filePath string, output string) {
 
     text, err := util.ReadFile(filePath)
     if err != nil {
@@ -68,7 +68,7 @@ func CreateContract(filePath string, output string) {
     config = util.GetMapField(configs, "rules")
     rules := verifyAndGetRules(config)
 
-    text, err = util.ReadFile("template.js")
+    text, err = util.ReadFile(templatePath)
     if err != nil {
         util.PrintError(err)
     }

@@ -63,9 +63,9 @@ neb-cli data-gen merge-file <directory>  -o <file_content>
 #### Format for the files
 - trans_file.csv
    ```
-   NAS,n1Hb8rKQodFjQdksf8BDhbnnqgVrEDHLRC8,100.00
-   NAS,n1dn3ZjJPRnL4UdePFkwQ5b9AJqPxnsQvM2,101.00
-   NAS,n1ckLKYqUTSjgoEeV4HDtbTUg8pb38vmP68,88.88
+   id1,n1Hb8rKQodFjQdksf8BDhbnnqgVrEDHLRC8,100.00
+   id2,n1dn3ZjJPRnL4UdePFkwQ5b9AJqPxnsQvM2,101.00
+   id3,n1ckLKYqUTSjgoEeV4HDtbTUg8pb38vmP68,88.88
    ```
 
 ### Sign content with private key (cold environment)

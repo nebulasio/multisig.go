@@ -22,7 +22,7 @@ func readKey(keyPath string) (string, error) {
 }
 
 func sign(info map[string]interface{}, key string) error {
-    data := util.VerifyAndGetField(info, "data")
+    data := util.GetField(info, "data")
 
     bytesKey, err := hex.DecodeString(key)
     if err != nil {
@@ -54,7 +54,7 @@ func sign(info map[string]interface{}, key string) error {
 }
 
 func vote(info map[string]interface{}, key string, voteValue string) error {
-    data := util.VerifyAndGetField(info, "data")
+    data := util.GetField(info, "data")
 
     bytesKey, err := hex.DecodeString(key)
     if err != nil {

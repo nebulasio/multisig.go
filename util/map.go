@@ -1,6 +1,6 @@
 package util
 
-func VerifyAndGetField(dict map[string]interface{}, fieldName string) interface{} {
+func GetField(dict map[string]interface{}, fieldName string) interface{} {
     r, ok := dict[fieldName]
     if !ok {
         PrintError(fieldName, " field is empty. ")
@@ -9,8 +9,7 @@ func VerifyAndGetField(dict map[string]interface{}, fieldName string) interface{
 }
 
 func GetStringField(dict map[string]interface{}, fieldName string) string {
-    r := VerifyAndGetField(dict, fieldName)
-    return ToString(r)
+    return ToString(GetField(dict, fieldName))
 }
 
 func GetNotEmptyStringField(dict map[string]interface{}, fieldName string) string {
@@ -22,11 +21,9 @@ func GetNotEmptyStringField(dict map[string]interface{}, fieldName string) strin
 }
 
 func GetSliceField(dict map[string]interface{}, fieldName string) []interface{} {
-    r := VerifyAndGetField(dict, fieldName)
-    return ToSlice(r)
+    return ToSlice(GetField(dict, fieldName))
 }
 
 func GetMapField(dict map[string]interface{}, fieldName string) map[string]interface{} {
-    r := VerifyAndGetField(dict, fieldName)
-    return ToMap(r)
+    return ToMap(GetField(dict, fieldName))
 }

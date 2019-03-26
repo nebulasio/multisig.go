@@ -15,7 +15,7 @@ func verifyVoteAction(action map[string]interface{}) {
 func verifyCallContractAction(detail map[string]interface{}) {
     address := GetStringField(detail, "address")
     _ = GetStringField(detail, "func")
-    args := VerifyAndGetField(detail, "args")
+    args := GetField(detail, "args")
     if !IsSlice(args) {
         PrintError("args is not array.")
     }

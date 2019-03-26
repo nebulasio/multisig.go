@@ -65,8 +65,8 @@ func executeContractCmd(cmd string) {
     switch cmd {
 
     case "gen":
-        checkArgsLen(4)
-        tool.CreateContract(os.Args[3], getOutputPath())
+        checkArgsLen(5)
+        tool.CreateContract(os.Args[3], os.Args[4], getOutputPath())
 
     case "deploy":
         // TODO:
