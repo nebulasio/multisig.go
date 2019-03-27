@@ -5,7 +5,7 @@ BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 CURRENT_DIR=$(shell pwd)
 BUILD_DIR=${CURRENT_DIR}
-BINARY=nebms
+BINARY=neb-cli
 
 VET_REPORT=vet.report
 LINT_REPORT=lint.report
